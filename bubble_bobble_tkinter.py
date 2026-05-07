@@ -17,6 +17,9 @@ except ImportError:
     ImageFont = None
 
 
+ROOT_DIR = Path(__file__).resolve().parent
+GLYPH_FONT_PATH = ROOT_DIR / "assets" / "fonts" / "NotoSansJP-Regular.otf"
+
 # Screen size, physics tuning, entity sizes, tile layout, and palette constants.
 SCREEN_WIDTH = 820
 SCREEN_HEIGHT = 640
@@ -187,19 +190,9 @@ GLYPH_LEVEL_SPECS = [
 
 
 def find_glyph_font() -> str | None:
-    """Find a local font that can render the glyph-based level recipes."""
-    candidates = [
-        Path("C:/Windows/Fonts/YuGothM.ttc"),
-        Path("C:/Windows/Fonts/YuGothR.ttc"),
-        Path("C:/Windows/Fonts/meiryo.ttc"),
-        Path("C:/Windows/Fonts/msgothic.ttc"),
-        Path("C:/Windows/Fonts/msyh.ttc"),
-        Path("C:/Windows/Fonts/simhei.ttf"),
-        Path("C:/Windows/Fonts/seguihis.ttf"),
-    ]
-    for candidate in candidates:
-        if candidate.exists():
-            return str(candidate)
+    """Find the bundled font used for glyph-based level recipes."""
+    if GLYPH_FONT_PATH.exists():
+        return str(GLYPH_FONT_PATH)
     return None
 
 

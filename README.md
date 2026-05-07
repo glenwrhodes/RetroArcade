@@ -46,7 +46,7 @@ VibeCodeArcade is a vibe-coded collection of small arcade-inspired games built a
 
 - Python 3.10 or newer
 - Tkinter, which is included with most standard Python installations
-- Pillow, used by `bubble_bobble_tkinter.py` to generate enhanced glyph-based levels
+- Pillow, used by `bubble_bobble_tkinter.py` to generate enhanced glyph-based levels from the bundled Noto Sans JP font
 
 Install Python package dependencies with:
 
@@ -67,3 +67,5 @@ Replace `tetris_tkinter.py` with any of the other game script filenames.
 ## Notes
 
 Most games only use the Python standard library. If Pillow is not installed, `bubble_bobble_tkinter.py` still runs using fallback level maps.
+
+`bubble_bobble_tkinter.py` uses `assets/fonts/NotoSansJP-Regular.otf` for glyph-based level generation, so it no longer depends on fonts installed in `C:\Windows\Fonts`. The bundled font is Noto Sans JP, licensed under the SIL Open Font License 1.1; see `assets/fonts/NotoSansJP-LICENSE.txt`.
