@@ -271,7 +271,8 @@ def render_glyph_mask(glyph: str, font: object, image_size: int, cols: int, rows
             right = (col_index + 1) * image_size // cols
             bottom = (row_index + 1) * image_size // rows
             tile = image.crop((left, top, right, bottom))
-            density = sum(tile.getdata()) / (255 * tile.width * tile.height)
+            histogram = tile.histogram()
+            density = sum(value * count for value, count in enumerate(histogram)) / (255 * tile.width * tile.height)
             mask_row.append(density > 0.16)
         mask.append(mask_row)
     return mask
