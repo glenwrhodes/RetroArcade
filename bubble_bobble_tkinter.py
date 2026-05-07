@@ -17,6 +17,7 @@ except ImportError:
     ImageFont = None
 
 
+# Screen size, physics tuning, entity sizes, tile layout, and palette constants.
 SCREEN_WIDTH = 820
 SCREEN_HEIGHT = 640
 TICK_MS = 16
@@ -55,6 +56,7 @@ TILE_SIZE = 32
 MAP_X = 10
 MAP_Y = 56
 
+# Hand-authored fallback maps keep the game playable when Pillow or suitable fonts are missing.
 FALLBACK_LEVEL_MAPS = [
     {
         "name": "Kana Gate",
@@ -150,6 +152,7 @@ FALLBACK_LEVEL_MAPS = [
     },
 ]
 
+# Optional glyph recipes generate many more maze layouts from rendered character masks.
 GLYPH_LEVEL_SPECS = [
     ("Mountain Cut", "山", "三", "subtract"),
     ("River Lattice", "川", "王", "xor"),
@@ -184,6 +187,7 @@ GLYPH_LEVEL_SPECS = [
 
 
 def find_glyph_font() -> str | None:
+    """Find a local font that can render the glyph-based level recipes."""
     candidates = [
         Path("C:/Windows/Fonts/YuGothM.ttc"),
         Path("C:/Windows/Fonts/YuGothR.ttc"),
@@ -206,6 +210,7 @@ def generate_glyph_level(
     modifier_glyph: str | None = None,
     operation: str = "single",
 ) -> dict[str, list[str] | str]:
+    """Convert one glyph recipe into a tile map with walls, spawn points, and enemies."""
     if Image is None or ImageDraw is None or ImageFont is None:
         raise RuntimeError("Pillow is required for glyph level generation")
 
@@ -251,6 +256,7 @@ def generate_glyph_level(
 
 
 def render_glyph_mask(glyph: str, font: object, image_size: int, cols: int, rows: int) -> list[list[bool]]:
+    """Rasterize a glyph and sample it into the coarse level grid."""
     if Image is None or ImageDraw is None:
         raise RuntimeError("Pillow is required for glyph level generation")
 
@@ -279,6 +285,7 @@ def render_glyph_mask(glyph: str, font: object, image_size: int, cols: int, rows
 
 
 def combine_glyph_masks(base: list[list[bool]], modifier: list[list[bool]], operation: str) -> list[list[bool]]:
+    """Blend two glyph masks to create more varied wall silhouettes."""
     padded_modifier = dilate_mask(modifier)
     overlap = [[base_cell and modifier_cell for base_cell, modifier_cell in zip(base_row, modifier_row)] for base_row, modifier_row in zip(base, modifier)]
     padded_overlap = dilate_mask(overlap)
@@ -308,6 +315,7 @@ def combine_glyph_masks(base: list[list[bool]], modifier: list[list[bool]], oper
 
 
 def dilate_mask(mask: list[list[bool]]) -> list[list[bool]]:
+    """Thicken mask cells so generated platforms are playable instead of too sparse."""
     rows = len(mask)
     cols = len(mask[0]) if rows else 0
     dilated = [[False for _ in range(cols)] for _ in range(rows)]
@@ -325,6 +333,7 @@ def dilate_mask(mask: list[list[bool]]) -> list[list[bool]]:
 
 
 def add_climbing_juts(rows: list[list[str]], glyph: str) -> None:
+    """Add short ledges around vertical strokes so players and enemies can traverse maps."""
     rng = random.Random(glyph)
     jut_rows = list(range(13, 3, -3))
     vertical_cols = find_vertical_strokes(rows)
@@ -360,6 +369,7 @@ def add_climbing_juts(rows: list[list[str]], glyph: str) -> None:
 
 
 def add_vertical_access_steps(rows: list[list[str]], rng: random.Random) -> None:
+    """Create a rough ladder of reachable stepping stones from bottom to top."""
     previous_col = 4
     for row_index in (14, 12, 10, 8, 6, 4, 2):
         candidates = []
@@ -390,6 +400,7 @@ def add_vertical_access_steps(rows: list[list[str]], rng: random.Random) -> None
 
 
 def find_vertical_strokes(rows: list[list[str]]) -> list[int]:
+    """Find tall solid columns that are good anchors for generated ledges."""
     scored_cols: list[tuple[int, int]] = []
     for col_index in range(2, 23):
         longest_run = 0
@@ -408,6 +419,7 @@ def find_vertical_strokes(rows: list[list[str]]) -> list[int]:
 
 
 def place_jut(rows: list[list[str]], row_index: int, base_col: int, side: int, length: int) -> bool:
+    """Try to place a short horizontal platform beside a glyph wall."""
     start_col = base_col + side
     end_col = start_col + side * length
     step = 1 if side > 0 else -1
@@ -424,6 +436,7 @@ def place_jut(rows: list[list[str]], row_index: int, base_col: int, side: int, l
 
 
 def place_marker(rows: list[list[str]], marker: str, preferred: list[tuple[int, int]]) -> None:
+    """Place player, walking enemy, or airborne enemy markers in open spaces."""
     for row_index, col_index in preferred:
         if rows[row_index][col_index] == ".":
             rows[row_index][col_index] = marker
@@ -444,6 +457,7 @@ def place_marker(rows: list[list[str]], marker: str, preferred: list[tuple[int, 
 
 
 def build_level_maps() -> list[dict[str, list[str] | str]]:
+    """Use generated glyph maps when possible, otherwise fall back to hand-authored maps."""
     font_path = find_glyph_font()
     if font_path is None:
         return FALLBACK_LEVEL_MAPS
@@ -461,11 +475,13 @@ LEVEL_MAPS = build_level_maps()
 
 
 def stable_seed(*parts: object) -> int:
+    """Create deterministic random seeds from level names and glyph recipes."""
     text = "|".join(str(part) for part in parts)
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     return int(digest[:16], 16)
 
 
+# Runtime entities share rectangle geometry for platform checks and overlap tests.
 @dataclass
 class Rect:
     x: float
@@ -563,6 +579,8 @@ class Fruit(Rect):
 
 
 class BubbleBobbleGame:
+    """Runs level loading, platform physics, bubble trapping, enemy behavior, scoring, and drawing."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Bubble Platformer")
@@ -597,6 +615,7 @@ class BubbleBobbleGame:
 
         self.restart()
 
+    # Restart resets score and level progression, then loads the first map.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -612,6 +631,7 @@ class BubbleBobbleGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # Level maps are parsed from tile markers into platforms, player spawn, and enemies.
     def build_level(self) -> None:
         level_map = LEVEL_MAPS[(self.level - 1) % len(LEVEL_MAPS)]
         self.level_name = level_map["name"]
@@ -680,6 +700,7 @@ class BubbleBobbleGame:
                 )
             )
 
+    # Input stores held keys; the frame loop applies movement, jumping, and bubble shots.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -690,6 +711,7 @@ class BubbleBobbleGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # One frame advances actors, bubbles, fruits, collisions, level state, and drawing.
     def update(self) -> None:
         self.after_id = None
 
@@ -748,12 +770,14 @@ class BubbleBobbleGame:
         elif self.player.x > SCREEN_WIDTH:
             self.player.x = -self.player.width
 
+    # Bubble shots are short-lived projectiles that can later trap enemies.
     def shoot_bubble(self) -> None:
         direction = self.player.facing
         x = self.player.center_x + direction * 22 - BUBBLE_SIZE / 2
         y = self.player.y + 8
         self.bubbles.append(Bubble(x, y, BUBBLE_SIZE, BUBBLE_SIZE, vx=direction * 5.4, vy=-0.7))
 
+    # Enemy updates support both platform walkers and airborne chasers.
     def update_enemies(self) -> None:
         for enemy in self.enemies:
             if not enemy.alive or enemy.trapped:
@@ -822,6 +846,7 @@ class BubbleBobbleGame:
                     enemy.y = platform.bottom
                     enemy.vy = abs(enemy.vy)
 
+    # Shared actor movement resolves horizontal and vertical platform collisions separately.
     def move_actor(self, actor: Player | Enemy) -> None:
         actor.x += actor.vx
         for platform in self.platforms:
@@ -847,6 +872,7 @@ class BubbleBobbleGame:
                     actor.y = platform.bottom
                     actor.vy = 0
 
+    # Bubbles drift upward, hold trapped enemies for a limited time, then expire or release.
     def update_bubbles(self) -> None:
         remaining: list[Bubble] = []
         for bubble in self.bubbles:
@@ -902,6 +928,7 @@ class BubbleBobbleGame:
                     fruit.y = platform.top - fruit.height
                     fruit.vy = 0
 
+    # Collision handling covers trapping, popping, player damage, and fruit collection.
     def handle_collisions(self) -> None:
         self.handle_bubble_enemy_collisions()
         self.handle_bubble_pops()
@@ -977,11 +1004,13 @@ class BubbleBobbleGame:
         self.player.vy = 0
         self.player.invincible_ticks = 120
 
+    # Level progression waits briefly after all enemies are defeated.
     def check_level_clear(self) -> None:
         if self.enemies and all(not enemy.alive for enemy in self.enemies):
             self.level_pause = 110
             self.score += self.level * 1500
 
+    # Rendering clears and rebuilds the whole scene from the current game state.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
@@ -1101,6 +1130,7 @@ class BubbleBobbleGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Bubble Platformer")

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# World dimensions, physics tuning, and frame timing define the feel of the platformer.
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 540
 GROUND_Y = 470
@@ -34,6 +35,7 @@ COIN = "#facc15"
 FLAG = "#0f766e"
 
 
+# Shared rectangle math keeps movement, collision, and drawing code using one geometry model.
 @dataclass
 class Rect:
     x: float
@@ -125,6 +127,8 @@ class Player:
 
 
 class MarioTkinterGame:
+    """Coordinates the level data, input state, physics loop, camera, and canvas drawing."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Platformer")
@@ -156,6 +160,7 @@ class MarioTkinterGame:
 
         self.restart()
 
+    # Restart rebuilds all transient game state and cancels any old scheduled frame.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -171,6 +176,7 @@ class MarioTkinterGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # The level is hard-coded as simple entity lists so the game stays self-contained.
     def build_level(self) -> None:
         self.platforms = [
             Platform(0, GROUND_Y, WORLD_WIDTH, SCREEN_HEIGHT - GROUND_Y, GROUND),
@@ -208,6 +214,7 @@ class MarioTkinterGame:
             Enemy(2230, 335, 2210, 2400, -1.4),
         ]
 
+    # Input is stored as pressed keys; the update loop translates it into movement.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -218,6 +225,7 @@ class MarioTkinterGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # One frame of gameplay: apply physics, move actors, resolve interactions, then redraw.
     def update(self) -> None:
         self.after_id = None
         if not self.game_over and not self.finished:
@@ -231,6 +239,7 @@ class MarioTkinterGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # Horizontal and vertical movement are split so platform collision can be resolved cleanly.
     def update_player(self) -> None:
         if self.player.invincible_ticks > 0:
             self.player.invincible_ticks -= 1
@@ -259,6 +268,7 @@ class MarioTkinterGame:
         if self.player.y > SCREEN_HEIGHT + 120:
             self.hurt_player()
 
+    # Platform collisions are handled separately on each axis to avoid corner tunneling.
     def move_player_horizontally(self) -> None:
         self.player.x += self.player.vx
         self.player.x = max(0, min(self.player.x, WORLD_WIDTH - self.player.width))
@@ -285,6 +295,7 @@ class MarioTkinterGame:
                     self.player.y = platform.bottom
                     self.player.vy = 0
 
+    # Interaction checks handle enemy movement, pickups, player damage, and reaching the flag.
     def update_enemies(self) -> None:
         for enemy in self.enemies:
             enemy.update()
@@ -336,6 +347,7 @@ class MarioTkinterGame:
         self.camera_x += (target - self.camera_x) * 0.12
         self.camera_x = max(0, min(self.camera_x, WORLD_WIDTH - SCREEN_WIDTH))
 
+    # Drawing converts world coordinates through the camera and rebuilds the canvas each frame.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_sky()
@@ -479,6 +491,7 @@ class MarioTkinterGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Platformer")

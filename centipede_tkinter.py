@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# Grid, player-zone, projectile, and palette constants define the arcade playfield.
 SCREEN_WIDTH = 760
 SCREEN_HEIGHT = 720
 TICK_MS = 16
@@ -42,6 +43,7 @@ FLEA = "#a78bfa"
 ACCENT = "#14b8a6"
 
 
+# Shared geometry helpers let mushrooms, bullets, enemies, and the player collide consistently.
 @dataclass
 class Rect:
     x: float
@@ -136,6 +138,8 @@ class Flea(Rect):
 
 
 class CentipedeGame:
+    """Runs the mushroom field, segmented centipede, side enemies, input, collisions, and drawing."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Centipede")
@@ -170,6 +174,7 @@ class CentipedeGame:
 
         self.restart()
 
+    # Restart recreates the mushroom field, centipede wave, player, and timer state.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -190,6 +195,7 @@ class CentipedeGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # Level setup populates the destructible mushroom maze and segmented centipede.
     def create_mushroom_field(self) -> None:
         self.mushrooms = {}
         for _ in range(58):
@@ -214,6 +220,7 @@ class CentipedeGame:
             )
             self.segments.append(segment)
 
+    # Input stores held keys so movement and shooting are handled predictably per frame.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -224,6 +231,7 @@ class CentipedeGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # A frame advances the player, enemies, bullets, collision checks, and wave state.
     def update(self) -> None:
         self.after_id = None
         self.tick_count += 1
@@ -278,6 +286,7 @@ class CentipedeGame:
         if not self.bullet.active:
             self.bullet = None
 
+    # Centipede segments walk the grid, reverse on walls/mushrooms, and drop a row.
     def update_centipede(self) -> None:
         if self.tick_count % max(3, 10 - self.wave) != 0:
             return
@@ -331,6 +340,7 @@ class CentipedeGame:
         if self.flea.top > SCREEN_HEIGHT:
             self.flea.active = False
 
+    # Side enemies add pressure: spiders sweep the player zone while fleas seed mushrooms.
     def maybe_spawn_side_enemies(self) -> None:
         if self.spider is None and self.rng.random() < 0.004 + self.wave * 0.0005:
             from_left = self.rng.choice((True, False))
@@ -344,6 +354,7 @@ class CentipedeGame:
                 x = self.rng.randrange(2, GRID_COLS - 2) * CELL_SIZE + 4
                 self.flea = Flea(x, HUD_HEIGHT, 16, 28)
 
+    # Collision handling keeps bullet scoring separate from player damage checks.
     def handle_collisions(self) -> None:
         if self.bullet is not None:
             self.handle_bullet_collisions()
@@ -403,6 +414,7 @@ class CentipedeGame:
         for index, segment in enumerate(self.segments):
             segment.is_head = index == len(self.segments) - 1 or index == hit_index
 
+    # Damage resets the player for the next life without rebuilding the whole wave.
     def damage_player(self) -> None:
         self.player.lives -= 1
         if self.player.lives <= 0:
@@ -421,6 +433,7 @@ class CentipedeGame:
         self.score += 1000
         self.spawn_centipede()
 
+    # Drawing is fully state-driven; each frame clears and rebuilds the canvas.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
@@ -535,6 +548,7 @@ class CentipedeGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Centipede")

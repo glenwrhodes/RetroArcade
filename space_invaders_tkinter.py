@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# Screen sizing, movement speeds, formation layout, and palette live together for easy tuning.
 SCREEN_WIDTH = 860
 SCREEN_HEIGHT = 640
 TICK_MS = 16
@@ -44,6 +45,7 @@ PANEL = "#0f172a"
 ACCENT = "#14b8a6"
 
 
+# Lightweight entity records hold position and gameplay flags for collision/update code.
 @dataclass
 class Rect:
     x: float
@@ -112,6 +114,8 @@ class PlayerShip:
 
 
 class SpaceInvadersGame:
+    """Owns the alien wave, shields, player input, frame loop, collisions, and rendering."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Space Invaders")
@@ -148,6 +152,7 @@ class SpaceInvadersGame:
 
         self.restart()
 
+    # Restart clears projectiles and rebuilds the shields and alien formation.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -167,6 +172,7 @@ class SpaceInvadersGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # Formation and barrier builders define each new level's starting layout.
     def create_alien_wave(self) -> None:
         self.aliens = []
         total_width = ALIEN_COLS * ALIEN_WIDTH + (ALIEN_COLS - 1) * ALIEN_X_GAP
@@ -214,6 +220,7 @@ class SpaceInvadersGame:
                             )
                         )
 
+    # Input only records intent; movement and firing happen in the timed update loop.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -224,6 +231,7 @@ class SpaceInvadersGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # The frame loop advances actors, spawns alien shots, resolves hits, and redraws.
     def update(self) -> None:
         self.after_id = None
 
@@ -301,6 +309,7 @@ class SpaceInvadersGame:
         self.player_bullets = [bullet for bullet in self.player_bullets if bullet.bottom > 0]
         self.alien_bullets = [bullet for bullet in self.alien_bullets if bullet.top < SCREEN_HEIGHT]
 
+    # Only bottom-most aliens in each column fire, matching the classic arcade pattern.
     def fire_alien_bullet(self) -> None:
         living = [alien for alien in self.aliens if alien.alive]
         if not living:
@@ -328,6 +337,7 @@ class SpaceInvadersGame:
             )
         )
 
+    # Collision handling is split by projectile owner so scoring and damage stay clear.
     def handle_collisions(self) -> None:
         self.handle_player_bullet_hits()
         self.handle_alien_bullet_hits()
@@ -400,6 +410,7 @@ class SpaceInvadersGame:
             self.score += self.level * 500
             self.won_level_pause = 90
 
+    # The canvas is redrawn from current state every frame.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
@@ -510,6 +521,7 @@ class SpaceInvadersGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Space Invaders")

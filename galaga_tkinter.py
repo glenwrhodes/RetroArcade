@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# Screen sizing, ship movement, projectile speeds, and colors are grouped for easy tuning.
 SCREEN_WIDTH = 860
 SCREEN_HEIGHT = 680
 TICK_MS = 16
@@ -39,6 +40,7 @@ ENEMY_WINGS = ["#ef4444", "#f97316", "#facc15", "#38bdf8", "#a78bfa"]
 ENEMY_BODY = "#111827"
 
 
+# Entity dataclasses keep gameplay state separate from Tkinter canvas item details.
 @dataclass
 class Rect:
     x: float
@@ -137,6 +139,8 @@ class Enemy:
 
 
 class GalagaTkinterGame:
+    """Manages formation enemies, diving attack patterns, bullets, collisions, and drawing."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Galaga")
@@ -170,6 +174,7 @@ class GalagaTkinterGame:
 
         self.restart()
 
+    # Restart resets player/enemy state and seeds a new star field.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -192,6 +197,7 @@ class GalagaTkinterGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # The wave builder creates the home formation that enemies return to after diving.
     def create_wave(self) -> None:
         self.enemies = []
         cols = 10
@@ -220,6 +226,7 @@ class GalagaTkinterGame:
         self.player_bullets.clear()
         self.enemy_bullets.clear()
 
+    # Input stores held keys; movement and firing are processed once per frame.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -230,6 +237,7 @@ class GalagaTkinterGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # Each tick scrolls the background, updates actors, resolves combat, and redraws.
     def update(self) -> None:
         self.after_id = None
         self.ticks += 1
@@ -309,6 +317,7 @@ class GalagaTkinterGame:
 
         self.maybe_start_attack(living)
 
+    # Diving attacks temporarily leave formation, then curve back after leaving the screen.
     def update_diving_enemy(self, enemy: Enemy) -> None:
         enemy.dive_tick += 1
 
@@ -328,6 +337,7 @@ class GalagaTkinterGame:
         if enemy.y > SCREEN_HEIGHT + 50:
             self.return_enemy_to_formation(enemy)
 
+    # Attack selection alternates between single dives and grouped looping patterns.
     def maybe_start_attack(self, living: list[Enemy]) -> None:
         active_dives = sum(1 for enemy in living if enemy.diving)
         max_dives = 1 + min(self.wave // 2, 3)
@@ -400,6 +410,7 @@ class GalagaTkinterGame:
         self.player_bullets = [bullet for bullet in self.player_bullets if bullet.bottom > 0]
         self.enemy_bullets = [bullet for bullet in self.enemy_bullets if bullet.top < SCREEN_HEIGHT]
 
+    # Diving enemies are preferred shooters so active attacks feel more dangerous.
     def enemy_fire(self) -> None:
         living = [enemy for enemy in self.enemies if enemy.alive]
         if not living:
@@ -422,6 +433,7 @@ class GalagaTkinterGame:
             )
         )
 
+    # Collision methods separate player damage from scoring enemy hits.
     def handle_collisions(self) -> None:
         self.handle_player_hits()
         self.handle_enemy_hits()
@@ -474,6 +486,7 @@ class GalagaTkinterGame:
             self.score += self.wave * 1000
             self.wave_pause = 110
 
+    # Rendering is rebuilt from state so canvas objects never need to be tracked individually.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
@@ -621,6 +634,7 @@ class GalagaTkinterGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Galaga")

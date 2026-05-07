@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# Screen size, movement speeds, weapon tuning, and colors define the shmup's feel.
 SCREEN_WIDTH = 760
 SCREEN_HEIGHT = 720
 TICK_MS = 16
@@ -43,6 +44,7 @@ HUD = "#0f172a"
 ACCENT = "#14b8a6"
 
 
+# Entity records keep positions and gameplay flags independent of the drawing code.
 @dataclass
 class Rect:
     x: float
@@ -156,6 +158,8 @@ class Boss:
 
 
 class VerticalShmupGame:
+    """Coordinates scrolling terrain, enemy waves, boss logic, bullets, powerups, and rendering."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Vertical Shmup")
@@ -192,6 +196,7 @@ class VerticalShmupGame:
 
         self.restart()
 
+    # Restart clears all active actors and rebuilds the scrolling background state.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -214,6 +219,7 @@ class VerticalShmupGame:
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
+    # Terrain particles are visual-only markers that recycle downward to sell motion.
     def create_terrain(self) -> list[tuple[float, float, float, str]]:
         terrain = []
         for _ in range(38):
@@ -227,6 +233,7 @@ class VerticalShmupGame:
             )
         return terrain
 
+    # Input stores held keys; the update loop converts them into movement and firing.
     def on_key_press(self, event: tk.Event) -> None:
         key = event.keysym.lower()
         if key == "r":
@@ -237,6 +244,7 @@ class VerticalShmupGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.keys.discard(event.keysym.lower())
 
+    # Each frame advances the stage, actors, projectiles, pickups, and collision state.
     def update(self) -> None:
         self.after_id = None
         self.tick_count += 1
@@ -297,6 +305,7 @@ class VerticalShmupGame:
             self.fire_player_bullets()
             self.player.cooldown = max(7, 13 - self.player.weapon_level)
 
+    # Weapon level controls how many angled player shots are emitted.
     def fire_player_bullets(self) -> None:
         center = self.player.x + self.player.width / 2 - BULLET_WIDTH / 2
         y = self.player.y - BULLET_HEIGHT
@@ -310,6 +319,7 @@ class VerticalShmupGame:
             self.player_bullets.append(Bullet(center - 24, y + 10, BULLET_WIDTH, BULLET_HEIGHT, -2.8, PLAYER_BULLET_SPEED + 1.2, True))
             self.player_bullets.append(Bullet(center + 24, y + 10, BULLET_WIDTH, BULLET_HEIGHT, 2.8, PLAYER_BULLET_SPEED + 1.2, True))
 
+    # Enemy spawning is distance-based until the boss takes over the stage.
     def spawn_enemies(self) -> None:
         if self.boss is not None:
             return
@@ -384,6 +394,7 @@ class VerticalShmupGame:
                 )
             )
 
+    # Enemy updates handle regular movement and their individual firing timers.
     def update_enemies(self) -> None:
         for enemy in self.enemies:
             enemy.update(self.tick_count)
@@ -392,6 +403,7 @@ class VerticalShmupGame:
                 self.fire_enemy_bullet(enemy)
                 enemy.fire_timer = random.randrange(85, 165)
 
+    # Boss behavior has its own movement, bullet spread, and minion spawner.
     def update_boss(self) -> None:
         if self.boss is None or not self.boss.alive:
             return
@@ -470,6 +482,7 @@ class VerticalShmupGame:
         for powerup in self.powerups:
             powerup.update()
 
+    # Collision handling separates player shots, player damage, and powerup pickups.
     def handle_collisions(self) -> None:
         self.handle_player_bullet_hits()
         self.handle_player_damage()
@@ -547,6 +560,7 @@ class VerticalShmupGame:
         self.enemy_bullets = [bullet for bullet in self.enemy_bullets if bullet.top < SCREEN_HEIGHT + 40]
         self.powerups = [powerup for powerup in self.powerups if powerup.top < SCREEN_HEIGHT + 30]
 
+    # Rendering clears and redraws the whole scene from state each frame.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
@@ -710,6 +724,7 @@ class VerticalShmupGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Vertical Shmup")

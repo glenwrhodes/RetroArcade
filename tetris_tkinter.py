@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from tkinter import messagebox
 
 
+# Board sizing, timing, and color constants keep the rest of the game logic readable.
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 20
 CELL_SIZE = 30
@@ -22,6 +23,7 @@ ACCENT = "#0f766e"
 PREVIEW_BG = "#0f172a"
 LOCKED_BORDER = "#020617"
 
+# Tetromino definitions are stored as local block offsets plus a display color.
 SHAPES = {
     "I": {
         "color": "#06b6d4",
@@ -86,6 +88,8 @@ class Piece:
 
 
 class TetrisGame:
+    """Owns the Tkinter UI, game state, input bindings, update loop, and drawing."""
+
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Tkinter Tetris")
@@ -124,6 +128,7 @@ class TetrisGame:
 
         self.restart()
 
+    # Game lifecycle resets board state and keeps the Tkinter timer from duplicating.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -140,6 +145,7 @@ class TetrisGame:
         self.draw()
         self.schedule_tick()
 
+    # The falling loop speeds up with the level and reschedules itself with root.after.
     def schedule_tick(self) -> None:
         if not self.game_over and not self.paused:
             self.after_id = self.root.after(self.fall_delay_ms(), self.tick)
@@ -156,6 +162,7 @@ class TetrisGame:
         self.draw()
         self.schedule_tick()
 
+    # Player actions try a state change first, then redraw only when the move is valid.
     def move(self, dx: int, dy: int) -> bool:
         if self.game_over or self.paused:
             return False
@@ -215,6 +222,7 @@ class TetrisGame:
             self.schedule_tick()
         self.draw()
 
+    # Collision checks are the central rule gate for movement, rotation, and spawning.
     def is_valid_position(self, piece: Piece, dx: int = 0, dy: int = 0) -> bool:
         for x, y in piece.cells(dx, dy):
             if x < 0 or x >= BOARD_WIDTH or y >= BOARD_HEIGHT:
@@ -223,6 +231,7 @@ class TetrisGame:
                 return False
         return True
 
+    # Locking transfers the falling piece into the board, clears lines, then spawns next.
     def lock_piece(self) -> None:
         for x, y in self.current_piece.cells():
             if y < 0:
@@ -259,6 +268,7 @@ class TetrisGame:
             self.root.after_cancel(self.after_id)
             self.after_id = None
 
+    # Rendering is rebuilt from state each frame instead of mutating previous canvas items.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_board_background()
@@ -446,6 +456,7 @@ class TetrisGame:
 
 
 def main() -> None:
+    """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
         root.iconname("Tkinter Tetris")
