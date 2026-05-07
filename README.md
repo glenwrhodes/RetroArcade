@@ -12,6 +12,36 @@ VibeCodeArcade is a vibe-coded collection of small arcade-inspired games built a
 - `tetris_tkinter.py` - Tetris
 - `vertical_shmup_tkinter.py` - Vertical scrolling shoot 'em up
 
+## Screenshots
+
+### Bubble Bobble
+
+![Bubble Bobble-style platform game screenshot](screenshots/bubble-bobble.png)
+
+### Centipede
+
+![Centipede-style shooter screenshot](screenshots/centipede.png)
+
+### Galaga
+
+![Galaga-style shooter screenshot](screenshots/galaga.png)
+
+### Mario
+
+![Mario-style side-scrolling platformer screenshot](screenshots/mario.png)
+
+### Space Invaders
+
+![Space Invaders-style shooter screenshot](screenshots/space-invaders.png)
+
+### Tetris
+
+![Tetris screenshot](screenshots/tetris.png)
+
+### Vertical Shmup
+
+![Vertical scrolling shoot 'em up screenshot](screenshots/vertical-shmup.png)
+
 ## Requirements
 
 - Python 3.10 or newer
