@@ -8,6 +8,7 @@ VibeCodeArcade is a vibe-coded collection of small arcade-inspired games built a
 - `mushroom_march_tkinter.py` - Segmented crawler shooter
 - `sky_armada_tkinter.py` - Fixed formation space shooter
 - `pixel_runner_tkinter.py` - Side-scrolling platform runner
+- `monkey_kong_tkinter.py` - Ladder-climbing barrel dodger
 - `star_invaders_tkinter.py` - Starfield defense shooter
 - `block_drop_tkinter.py` - Falling-block puzzle game
 - `nebula_wings_tkinter.py` - Vertical scrolling space shooter
