@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import tkinter as tk
 from dataclasses import dataclass
 from tkinter import messagebox
@@ -17,6 +18,9 @@ TICK_MS = 16
 GRAVITY = 0.75
 MOVE_SPEED = 5.2
 JUMP_SPEED = -15.5
+JUMP_HOLD_GRAVITY = 0.34
+JUMP_RELEASE_CUT_SPEED = -5.8
+MAX_JUMP_HOLD_TICKS = 12
 MAX_FALL_SPEED = 18
 FRICTION = 0.78
 
@@ -32,6 +36,7 @@ PLAYER_BLUE = "#2563eb"
 PLAYER_SKIN = "#fed7aa"
 ENEMY = "#78350f"
 COIN = "#facc15"
+COIN_PULSE_COLORS = ("#fef08a", "#fde047", "#facc15", "#f59e0b", "#fbbf24")
 FLAG = "#0f766e"
 
 
@@ -118,6 +123,7 @@ class Player:
     vx: float = 0
     vy: float = 0
     on_ground: bool = False
+    jump_hold_ticks: int = 0
     lives: int = 3
     invincible_ticks: int = 0
 
@@ -153,6 +159,8 @@ class PixelRunnerTkinterGame:
         self.finished = False
         self.game_over = False
         self.after_id: str | None = None
+        self.frame_count = 0
+        self.jump_was_pressed = False
 
         self.root.bind("<KeyPress>", self.on_key_press)
         self.root.bind("<KeyRelease>", self.on_key_release)
@@ -171,6 +179,8 @@ class PixelRunnerTkinterGame:
         self.score = 0
         self.finished = False
         self.game_over = False
+        self.frame_count = 0
+        self.jump_was_pressed = False
         self.keys.clear()
         self.build_level()
         self.draw()
@@ -228,6 +238,7 @@ class PixelRunnerTkinterGame:
     # One frame of gameplay: apply physics, move actors, resolve interactions, then redraw.
     def update(self) -> None:
         self.after_id = None
+        self.frame_count += 1
         if not self.game_over and not self.finished:
             self.update_player()
             self.update_enemies()
@@ -247,6 +258,7 @@ class PixelRunnerTkinterGame:
         moving_left = "left" in self.keys or "a" in self.keys
         moving_right = "right" in self.keys or "d" in self.keys
         wants_jump = "space" in self.keys or "up" in self.keys or "w" in self.keys
+        jump_pressed = wants_jump and not self.jump_was_pressed
 
         if moving_left and not moving_right:
             self.player.vx = -MOVE_SPEED
@@ -257,13 +269,24 @@ class PixelRunnerTkinterGame:
             if abs(self.player.vx) < 0.15:
                 self.player.vx = 0
 
-        if wants_jump and self.player.on_ground:
+        if jump_pressed and self.player.on_ground:
             self.player.vy = JUMP_SPEED
             self.player.on_ground = False
+            self.player.jump_hold_ticks = MAX_JUMP_HOLD_TICKS
 
-        self.player.vy = min(self.player.vy + GRAVITY, MAX_FALL_SPEED)
+        if wants_jump and self.player.jump_hold_ticks > 0 and self.player.vy < 0:
+            gravity = JUMP_HOLD_GRAVITY
+            self.player.jump_hold_ticks -= 1
+        else:
+            gravity = GRAVITY
+            self.player.jump_hold_ticks = 0
+            if not wants_jump and self.player.vy < JUMP_RELEASE_CUT_SPEED:
+                self.player.vy = JUMP_RELEASE_CUT_SPEED
+
+        self.player.vy = min(self.player.vy + gravity, MAX_FALL_SPEED)
         self.move_player_horizontally()
         self.move_player_vertically()
+        self.jump_was_pressed = wants_jump
 
         if self.player.y > SCREEN_HEIGHT + 120:
             self.hurt_player()
@@ -294,6 +317,7 @@ class PixelRunnerTkinterGame:
                 elif self.player.vy < 0:
                     self.player.y = platform.bottom
                     self.player.vy = 0
+                    self.player.jump_hold_ticks = 0
 
     # Interaction checks handle enemy movement, pickups, player damage, and reaching the flag.
     def update_enemies(self) -> None:
@@ -317,6 +341,7 @@ class PixelRunnerTkinterGame:
             if player_was_falling and player_bottom - enemy_top < 24:
                 enemy.alive = False
                 self.player.vy = JUMP_SPEED * 0.55
+                self.player.jump_hold_ticks = 0
                 self.score += 250
             else:
                 self.hurt_player()
@@ -335,6 +360,7 @@ class PixelRunnerTkinterGame:
         self.player.y = GROUND_Y - self.player.height
         self.player.vx = 0
         self.player.vy = 0
+        self.player.jump_hold_ticks = 0
         self.player.invincible_ticks = 110
 
     def check_goal(self) -> None:
@@ -426,8 +452,14 @@ class PixelRunnerTkinterGame:
                 continue
             sx, sy = self.world_to_screen(coin.x, coin.y)
             if -30 <= sx <= SCREEN_WIDTH + 30:
-                self.canvas.create_oval(sx - 11, sy - 14, sx + 11, sy + 14, fill=COIN, outline="#ca8a04", width=2)
-                self.canvas.create_line(sx, sy - 9, sx, sy + 9, fill="#fef08a", width=2)
+                pulse = (math.sin(self.frame_count * 0.18 + coin.x * 0.035) + 1) / 2
+                color_index = min(int(pulse * len(COIN_PULSE_COLORS)), len(COIN_PULSE_COLORS) - 1)
+                fill = COIN_PULSE_COLORS[color_index]
+                highlight = "#fff7ad" if pulse > 0.62 else "#fef08a"
+                outline = "#f59e0b" if pulse > 0.42 else "#ca8a04"
+
+                self.canvas.create_oval(sx - 11, sy - 14, sx + 11, sy + 14, fill=fill, outline=outline, width=2)
+                self.canvas.create_line(sx, sy - 9, sx, sy + 9, fill=highlight, width=2)
 
     def draw_enemies(self) -> None:
         for enemy in self.enemies:
