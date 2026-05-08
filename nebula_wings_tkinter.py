@@ -1,4 +1,4 @@
-"""A vertical scrolling shoot-'em-up with a boss fight, built with Tkinter."""
+"""A vertical scrolling space shooter with a boss fight, built with Tkinter."""
 
 from __future__ import annotations
 
@@ -157,12 +157,12 @@ class Boss:
         return Rect(self.x, self.y, self.width, self.height)
 
 
-class VerticalShmupGame:
+class NebulaWingsGame:
     """Coordinates scrolling terrain, enemy waves, boss logic, bullets, powerups, and rendering."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Vertical Shmup")
+        self.root.title("Tkinter Nebula Wings")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -727,11 +727,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Vertical Shmup")
+        root.iconname("Tkinter Nebula Wings")
     except tk.TclError:
         pass
 
-    VerticalShmupGame(root)
+    NebulaWingsGame(root)
     root.mainloop()
 
 
@@ -739,4 +739,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Vertical Shmup", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Nebula Wings", f"Could not start Tkinter: {exc}")

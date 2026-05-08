@@ -1,4 +1,4 @@
-"""A Space Invaders-style arcade game built with Tkinter."""
+"""A starfield defense arcade game built with Tkinter."""
 
 from __future__ import annotations
 
@@ -113,12 +113,12 @@ class PlayerShip:
         return Rect(self.x, self.y, self.width, self.height)
 
 
-class SpaceInvadersGame:
+class StarInvadersGame:
     """Owns the alien wave, shields, player input, frame loop, collisions, and rendering."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Space Invaders")
+        self.root.title("Tkinter Star Invaders")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -524,11 +524,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Space Invaders")
+        root.iconname("Tkinter Star Invaders")
     except tk.TclError:
         pass
 
-    SpaceInvadersGame(root)
+    StarInvadersGame(root)
     root.mainloop()
 
 
@@ -536,4 +536,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Space Invaders", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Star Invaders", f"Could not start Tkinter: {exc}")

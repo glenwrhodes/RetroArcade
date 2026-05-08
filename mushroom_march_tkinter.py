@@ -1,4 +1,4 @@
-"""A Centipede-style arcade shooter built with Tkinter."""
+"""A segmented crawler arcade shooter built with Tkinter."""
 
 from __future__ import annotations
 
@@ -137,12 +137,12 @@ class Flea(Rect):
     active: bool = True
 
 
-class CentipedeGame:
-    """Runs the mushroom field, segmented centipede, side enemies, input, collisions, and drawing."""
+class MushroomMarchGame:
+    """Runs the mushroom field, segmented crawler, side enemies, input, collisions, and drawing."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Centipede")
+        self.root.title("Tkinter Mushroom March")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -174,7 +174,7 @@ class CentipedeGame:
 
         self.restart()
 
-    # Restart recreates the mushroom field, centipede wave, player, and timer state.
+    # Restart recreates the mushroom field, crawler wave, player, and timer state.
     def restart(self) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
@@ -189,13 +189,13 @@ class CentipedeGame:
         self.tick_count = 0
         self.rng = random.Random(42)
         self.create_mushroom_field()
-        self.spawn_centipede()
+        self.spawn_crawler()
         self.spider = None
         self.flea = None
         self.draw()
         self.after_id = self.root.after(TICK_MS, self.update)
 
-    # Level setup populates the destructible mushroom maze and segmented centipede.
+    # Level setup populates the destructible mushroom maze and segmented crawler.
     def create_mushroom_field(self) -> None:
         self.mushrooms = {}
         for _ in range(58):
@@ -203,7 +203,7 @@ class CentipedeGame:
             row = self.rng.randrange(3, GRID_ROWS - 6)
             self.mushrooms[(col, row)] = Mushroom(col, row)
 
-    def spawn_centipede(self) -> None:
+    def spawn_crawler(self) -> None:
         self.segments = []
         length = 10 + min(self.wave, 8)
         for index in range(length):
@@ -239,7 +239,7 @@ class CentipedeGame:
         if not self.game_over:
             self.update_player()
             self.update_bullet()
-            self.update_centipede()
+            self.update_crawler()
             self.update_spider()
             self.update_flea()
             self.handle_collisions()
@@ -286,8 +286,8 @@ class CentipedeGame:
         if not self.bullet.active:
             self.bullet = None
 
-    # Centipede segments walk the grid, reverse on walls/mushrooms, and drop a row.
-    def update_centipede(self) -> None:
+    # Crawler segments walk the grid, reverse on walls/mushrooms, and drop a row.
+    def update_crawler(self) -> None:
         if self.tick_count % max(3, 10 - self.wave) != 0:
             return
 
@@ -392,7 +392,7 @@ class CentipedeGame:
                 col = int(segment.center_x // CELL_SIZE)
                 row = int(segment.center_y // CELL_SIZE)
                 self.mushrooms[(col, row)] = Mushroom(col, row, health=4)
-                self.split_centipede_at(segment)
+                self.split_crawler_at(segment)
                 self.bullet = None
                 return
 
@@ -408,7 +408,7 @@ class CentipedeGame:
             self.flea.active = False
             self.bullet = None
 
-    def split_centipede_at(self, hit_segment: Segment) -> None:
+    def split_crawler_at(self, hit_segment: Segment) -> None:
         hit_index = self.segments.index(hit_segment)
         del self.segments[hit_index]
         for index, segment in enumerate(self.segments):
@@ -431,14 +431,14 @@ class CentipedeGame:
             return
         self.wave += 1
         self.score += 1000
-        self.spawn_centipede()
+        self.spawn_crawler()
 
     # Drawing is fully state-driven; each frame clears and rebuilds the canvas.
     def draw(self) -> None:
         self.canvas.delete("all")
         self.draw_background()
         self.draw_mushrooms()
-        self.draw_centipede()
+        self.draw_crawler()
         self.draw_side_enemies()
         self.draw_bullet()
         self.draw_player()
@@ -481,7 +481,7 @@ class CentipedeGame:
             for dot_x in (rect.x + 7, rect.x + rect.width - 9):
                 self.canvas.create_oval(dot_x, rect.y + 9, dot_x + 4, rect.y + 13, fill="#fdf2f8", outline="")
 
-    def draw_centipede(self) -> None:
+    def draw_crawler(self) -> None:
         for segment in self.segments:
             x = segment.x + 2
             y = segment.y + 2
@@ -551,11 +551,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Centipede")
+        root.iconname("Tkinter Mushroom March")
     except tk.TclError:
         pass
 
-    CentipedeGame(root)
+    MushroomMarchGame(root)
     root.mainloop()
 
 
@@ -563,4 +563,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Centipede", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Mushroom March", f"Could not start Tkinter: {exc}")

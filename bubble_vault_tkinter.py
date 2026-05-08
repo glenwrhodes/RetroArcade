@@ -1,4 +1,4 @@
-"""A Bubble Bobble-style platform game built with Tkinter."""
+"""A bubble-trapping platform game built with Tkinter."""
 
 from __future__ import annotations
 
@@ -230,7 +230,7 @@ def generate_glyph_level(
             if combined_mask[row_index][col_index]:
                 rows[row_index + 1][col_index + 1] = "#"
 
-    # Keep the outer floor/walls reliable and open enough for Bubble Bobble movement.
+    # Keep the outer floor/walls reliable and open enough for bubble-platform movement.
     for col in range(1, 24):
         rows[16][col] = "."
     for col in range(1, 24):
@@ -577,7 +577,7 @@ class BubbleBobbleGame:
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Bubble Platformer")
+        self.root.title("Tkinter Bubble Vault")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -1127,7 +1127,7 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Bubble Platformer")
+        root.iconname("Tkinter Bubble Vault")
     except tk.TclError:
         pass
 
@@ -1139,4 +1139,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Bubble Platformer", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Bubble Vault", f"Could not start Tkinter: {exc}")

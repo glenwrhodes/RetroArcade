@@ -1,4 +1,4 @@
-"""A complete Tetris game implemented with the Python standard-library Tkinter UI."""
+"""A complete falling-block puzzle game implemented with the Python standard-library Tkinter UI."""
 
 from __future__ import annotations
 
@@ -87,12 +87,12 @@ class Piece:
         return [(x - min_x, y - min_y) for x, y in rotated]
 
 
-class TetrisGame:
+class BlockDropGame:
     """Owns the Tkinter UI, game state, input bindings, update loop, and drawing."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Tetris")
+        self.root.title("Tkinter Block Drop")
         self.root.resizable(False, False)
 
         width = BOARD_WIDTH * CELL_SIZE + SIDE_PANEL_WIDTH
@@ -338,7 +338,7 @@ class TetrisGame:
         self.canvas.create_text(
             panel_x + 22,
             34,
-            text="TETRIS",
+            text="BLOCK DROP",
             anchor="w",
             fill=TEXT_COLOR,
             font=("Segoe UI", 22, "bold"),
@@ -459,11 +459,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Tetris")
+        root.iconname("Tkinter Block Drop")
     except tk.TclError:
         pass
 
-    TetrisGame(root)
+    BlockDropGame(root)
     root.mainloop()
 
 
@@ -471,4 +471,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Tetris", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Block Drop", f"Could not start Tkinter: {exc}")

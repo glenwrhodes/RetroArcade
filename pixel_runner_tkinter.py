@@ -1,4 +1,4 @@
-"""A small Mario-style side-scrolling platformer built with Tkinter."""
+"""A small side-scrolling platform runner built with Tkinter."""
 
 from __future__ import annotations
 
@@ -126,12 +126,12 @@ class Player:
         return Rect(self.x, self.y, self.width, self.height)
 
 
-class MarioTkinterGame:
+class PixelRunnerTkinterGame:
     """Coordinates the level data, input state, physics loop, camera, and canvas drawing."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Platformer")
+        self.root.title("Tkinter Pixel Runner")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -494,11 +494,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Platformer")
+        root.iconname("Tkinter Pixel Runner")
     except tk.TclError:
         pass
 
-    MarioTkinterGame(root)
+    PixelRunnerTkinterGame(root)
     root.mainloop()
 
 
@@ -506,4 +506,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Platformer", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Pixel Runner", f"Could not start Tkinter: {exc}")

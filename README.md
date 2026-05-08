@@ -4,49 +4,49 @@ VibeCodeArcade is a vibe-coded collection of small arcade-inspired games built a
 
 ## Games
 
-- `bubble_bobble_tkinter.py` - Bubble Bobble-style platform game
-- `centipede_tkinter.py` - Centipede-style shooter
-- `galaga_tkinter.py` - Galaga-style shooter
-- `mario_tkinter.py` - Mario-style side-scrolling platformer
-- `space_invaders_tkinter.py` - Space Invaders-style shooter
-- `tetris_tkinter.py` - Tetris
-- `vertical_shmup_tkinter.py` - Vertical scrolling shoot 'em up
+- `bubble_vault_tkinter.py` - Bubble-trapping platform game
+- `mushroom_march_tkinter.py` - Segmented crawler shooter
+- `sky_armada_tkinter.py` - Fixed formation space shooter
+- `pixel_runner_tkinter.py` - Side-scrolling platform runner
+- `star_invaders_tkinter.py` - Starfield defense shooter
+- `block_drop_tkinter.py` - Falling-block puzzle game
+- `nebula_wings_tkinter.py` - Vertical scrolling space shooter
 
 ## Screenshots
 
-### Bubble Bobble
+### Bubble Vault
 
-![Bubble Bobble-style platform game screenshot](screenshots/bubble-bobble.png)
+![Bubble Vault platform game screenshot](screenshots/bubble-vault.png)
 
-### Centipede
+### Mushroom March
 
-![Centipede-style shooter screenshot](screenshots/centipede.png)
+![Mushroom March segmented crawler shooter screenshot](screenshots/mushroom-march.png)
 
-### Galaga
+### Sky Armada
 
-![Galaga-style shooter screenshot](screenshots/galaga.png)
+![Sky Armada fixed formation shooter screenshot](screenshots/sky-armada.png)
 
-### Mario
+### Pixel Runner
 
-![Mario-style side-scrolling platformer screenshot](screenshots/mario.png)
+![Pixel Runner side-scrolling platform game screenshot](screenshots/pixel-runner.png)
 
-### Space Invaders
+### Star Invaders
 
-![Space Invaders-style shooter screenshot](screenshots/space-invaders.png)
+![Star Invaders defense shooter screenshot](screenshots/star-invaders.png)
 
-### Tetris
+### Block Drop
 
-![Tetris screenshot](screenshots/tetris.png)
+![Block Drop falling-block puzzle screenshot](screenshots/block-drop.png)
 
-### Vertical Shmup
+### Nebula Wings
 
-![Vertical scrolling shoot 'em up screenshot](screenshots/vertical-shmup.png)
+![Nebula Wings vertical scrolling space shooter screenshot](screenshots/nebula-wings.png)
 
 ## Requirements
 
 - Python 3.10 or newer
 - Tkinter, which is included with most standard Python installations
-- Pillow, used by `bubble_bobble_tkinter.py` to generate enhanced glyph-based levels from the bundled Noto Sans JP font
+- Pillow, used by `bubble_vault_tkinter.py` to generate enhanced glyph-based levels from the bundled Noto Sans JP font
 
 Install Python package dependencies with:
 
@@ -59,13 +59,13 @@ pip install -r requirements.txt
 Each game is a standalone script. Run the one you want from the repository directory:
 
 ```powershell
-python .\tetris_tkinter.py
+python .\block_drop_tkinter.py
 ```
 
-Replace `tetris_tkinter.py` with any of the other game script filenames.
+Replace `block_drop_tkinter.py` with any of the other game script filenames.
 
 ## Notes
 
-Most games only use the Python standard library. If Pillow is not installed, `bubble_bobble_tkinter.py` still runs using fallback level maps.
+Most games only use the Python standard library. If Pillow is not installed, `bubble_vault_tkinter.py` still runs using fallback level maps.
 
-`bubble_bobble_tkinter.py` uses `assets/fonts/NotoSansJP-Regular.otf` for glyph-based level generation, so it no longer depends on fonts installed in `C:\Windows\Fonts`. The bundled font is Noto Sans JP, licensed under the SIL Open Font License 1.1; see `assets/fonts/NotoSansJP-LICENSE.txt`.
+`bubble_vault_tkinter.py` uses `assets/fonts/NotoSansJP-Regular.otf` for glyph-based level generation, so it no longer depends on fonts installed in `C:\Windows\Fonts`. The bundled font is Noto Sans JP, licensed under the SIL Open Font License 1.1; see `assets/fonts/NotoSansJP-LICENSE.txt`.

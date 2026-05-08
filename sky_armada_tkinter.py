@@ -1,4 +1,4 @@
-"""A Galaga-style fixed shooter built with Tkinter."""
+"""A fixed formation space shooter built with Tkinter."""
 
 from __future__ import annotations
 
@@ -138,12 +138,12 @@ class Enemy:
         return 400 if self.row == 0 else 250 if self.row <= 2 else 150
 
 
-class GalagaTkinterGame:
+class SkyArmadaTkinterGame:
     """Manages formation enemies, diving attack patterns, bullets, collisions, and drawing."""
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Tkinter Galaga")
+        self.root.title("Tkinter Sky Armada")
         self.root.resizable(False, False)
 
         self.canvas = tk.Canvas(
@@ -637,11 +637,11 @@ def main() -> None:
     """Create the Tkinter root and hand control to Tkinter's event loop."""
     root = tk.Tk()
     try:
-        root.iconname("Tkinter Galaga")
+        root.iconname("Tkinter Sky Armada")
     except tk.TclError:
         pass
 
-    GalagaTkinterGame(root)
+    SkyArmadaTkinterGame(root)
     root.mainloop()
 
 
@@ -649,4 +649,4 @@ if __name__ == "__main__":
     try:
         main()
     except tk.TclError as exc:
-        messagebox.showerror("Tkinter Galaga", f"Could not start Tkinter: {exc}")
+        messagebox.showerror("Tkinter Sky Armada", f"Could not start Tkinter: {exc}")
