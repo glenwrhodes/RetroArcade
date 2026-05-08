@@ -14,9 +14,9 @@ SCREEN_HEIGHT = 640
 HUD_HEIGHT = 54
 TICK_MS = 16
 
-GRAVITY = 0.65
+GRAVITY = 0.72
 PLAYER_SPEED = 4.8
-JUMP_SPEED = -12.8
+JUMP_SPEED = -8.8
 CLIMB_SPEED = 3.8
 MAX_FALL_SPEED = 14
 FRICTION = 0.8
@@ -300,9 +300,13 @@ class MonkeyKongGame:
 
         if player.climbing:
             self.keep_player_inside_ladder(ladder)
-            landing = self.surface_near_player()
-            if landing is not None and "up" not in self.keys and player.rect.bottom >= landing - 2:
-                self.land_player_on(landing)
+            top_surface = self.ladder_surface(ladder, use_top=True)
+            bottom_surface = self.ladder_surface(ladder, use_top=False)
+            if climb_direction < 0 and top_surface is not None and player.rect.bottom <= top_surface + 4:
+                self.land_player_on(top_surface)
+                player.climbing = False
+            elif climb_direction > 0 and bottom_surface is not None and player.rect.bottom >= bottom_surface - 4:
+                self.land_player_on(bottom_surface)
                 player.climbing = False
             return
 
@@ -322,8 +326,10 @@ class MonkeyKongGame:
             self.player.climbing = False
             return
 
-        top_limit = ladder.y - self.player.height + 10
-        bottom_limit = ladder.y + ladder.height - 4
+        top_surface = self.ladder_surface(ladder, use_top=True)
+        bottom_surface = self.ladder_surface(ladder, use_top=False)
+        top_limit = (top_surface if top_surface is not None else ladder.y) - self.player.height - 1
+        bottom_limit = (bottom_surface if bottom_surface is not None else ladder.y + ladder.height) - self.player.height + 1
         self.player.y = max(top_limit, min(bottom_limit, self.player.y))
 
     def try_jump(self) -> None:
@@ -369,6 +375,21 @@ class MonkeyKongGame:
                 if abs(player_rect.bottom - surface_y) <= 12:
                     return surface_y
         return None
+
+    def ladder_surface(self, ladder: Ladder | None, use_top: bool) -> float | None:
+        if ladder is None:
+            return None
+
+        center_x = ladder.center_x
+        reference_y = ladder.y if use_top else ladder.y + ladder.height
+        surfaces = [
+            beam.y_at(center_x)
+            for beam in self.beams
+            if beam.min_x - 10 <= center_x <= beam.max_x + 10
+        ]
+        if not surfaces:
+            return None
+        return min(surfaces, key=lambda surface_y: abs(surface_y - reference_y))
 
     def land_player_on(self, surface_y: float) -> None:
         self.player.y = surface_y - self.player.height
